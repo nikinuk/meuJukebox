@@ -131,6 +131,9 @@ def get_artist_genres(artist_id, API_BASE_URL, headers):
     response = requests.get(search_url, headers=headers)
     result = response.json()
 
+    if result['genres'] == []:
+        return [result['name'].replace("'", "`")]
+
     return result['genres']
 
 def get_playlists(API_BASE_URL, headers):

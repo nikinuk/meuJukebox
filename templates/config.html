@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Jukebox Config</title>
+    <style>
+
+        .container {
+        display: flex;
+        }
+        .nav-window {
+  display: flex;
+  flex-direction: column;
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  height: 100vh; 
+  overflow-y: auto; 
+  background-color: #909090; 
+  padding: 20px; 
+}
+.content  {
+  margin-left: 200px; /* Adjust this value based on your nav-menu width */
+  padding: 20px; 
+  display: flex;
+  flex-direction: column;
+}
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+        .key-cell {
+            width: 100px;
+        }
+        .value-cell {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-menu button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-window">
+            <div class="title">
+                <p>Gerenciamento do jukebox</p>
+            </div>
+            <div class="nav-menu">
+                <nav>
+                    <div><a href="/setup">Configurações gerais</a></div>
+                    <div><a href="/generos">Gestão de bloqueios</a></div>
+                    <div><a href="/promos">Promoções</a></div>
+                    <div><a href="/relatorios">Relatórios</a></div>
+                    <div><br><a href="/serve">Voltar</a></div>
+                    <button onclick="location.href='/aplicar_setup?rota=setup'">APLICAR</button>
+                </nav>
+            </div>
+        </div>
+        <div class="content">
+            <div class="title">
+                <p>Configurações gerais</p>
+            </div>
+            <div id="config-display"></div>
+        </div>
+    </div>
+    <script>
+        fetch('/get_config')
+        .then(response => response.json())
+        .then(data => {
+            const configDisplay = document.getElementById('config-display');
+            const configTable = document.createElement('table');
+            configTable.classList.add('config-table');
+
+            for (const key in data) {
+            const row = configTable.insertRow();
+            const keyCell = row.insertCell();
+            keyCell.classList.add('key-cell');
+
+            const valueCell = row.insertCell();
+            valueCell.classList.add('value-cell');
+
+            keyCell.textContent = key;
+            valueCell.textContent = data[key];
+
+            // Condition to exclude specific keys
+            if (!['id', 'list_2_ban', 'list_2_grant','config_name'].includes(key)) {
+                // Create input field for editing ONLY if the key is NOT excluded
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = data[key];
+                input.addEventListener('change', () => {
+                const newData = { ...data, [key]: input.value };
+                fetch('/update_config', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newData)
+                })
+                    .then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                        title: "Atualização efetuada!",
+                        text: "Suas alterações foram realizadas com sucesso",
+                        icon: "success"
+                        });
+                        location.reload();
+                    } else {
+                        Swal.fire({
+                        title: "ERRO",
+                        text: "Algo de errado não está certo",
+                        icon: "error"
+                        });
+                    }
+                    });
+                });
+
+                valueCell.appendChild(input);
+            }
+            }
+
+            configDisplay.appendChild(configTable);
+        })
+        .catch(error => {
+            console.error('Error fetching config:', error);
+            configDisplay.textContent = 'Error loading config.';
+        });
+
+    </script>
+</body>
+</html>

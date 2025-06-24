@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<title>Gestão de bloqueios</title>
+<style>
+
+.container {
+  display: flex;
+
+}
+.nav-window {
+  display: flex;
+  flex-direction: column;
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  height: 100vh; 
+  overflow-y: auto; 
+  background-color: #909090; 
+  padding: 20px; 
+}
+.content1  {
+  margin-left: 200px; /* Adjust this value based on your nav-menu width */
+  padding: 20px; 
+  display: flex;
+  flex-direction: column;
+}
+
+.content2 {
+  display: flex;
+}
+
+.genre-box {
+  width: 200px; /* Adjust width as needed */
+  height: 400px; /* Adjust height as needed */
+  overflow-y: auto; /* Enable vertical scrollbar */
+  scrollbar-width:20px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  background-color: #bfd0f0;
+}
+
+.sub_right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.right-box-area {
+  display: flex;
+}
+
+.right-box-area button {
+  height: 40px ;
+  margin-left: 20px;
+  margin-top: 5px;
+  align-self: center;
+}
+
+.control-area {
+  display: flex;
+  flex-direction: column;
+  justify-content:center
+}
+
+.grant-box {
+  width: 200px; /* Adjust width as needed */
+  height: 150px; /* Adjust height as needed */
+  overflow-y: auto; /* Enable vertical scrollbar */
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin-left: 20px;
+  background-color: #b3f6b9;
+}
+
+
+.ban-box {
+  width: 200px; /* Adjust width as needed */
+  height: 150px; /* Adjust height as needed */
+  overflow-y: auto; /* Enable vertical scrollbar */
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin-left: 20px;
+  background-color: #fc9e9e;
+}
+
+.genre-item {
+  margin-bottom: 5px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.genre-item.selected {
+  background-color: #748ec0;
+}
+
+.grant-item {
+  margin-bottom: 5px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.grant-item.selected {
+  background-color: #72a577;
+}
+
+.ban-item {
+  margin-bottom: 5px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.ban-item.selected {
+  background-color: #c26c6c;
+}
+
+.report {
+  margin-bottom: 5px;
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+.msg_board {
+  padding: 5px;
+  border: 1px solid grey;
+  background-color: #748ec0;
+  width: 500px;
+  margin: 5px;
+}
+
+.msg_board.neutral {
+  background-color: #748ec0;
+}
+
+.msg_board.alert {
+  background-color: rgb(224, 224, 99);
+}
+
+.msg_board.error {
+  background-color: #d25c5c;
+}
+
+.msg_board.success {
+  background-color: #72a577;
+}
+.nav-menu button {
+            margin-top: 20px;
+        }
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav-window">
+      <div class="title">
+        <p>Gerenciamento do jukebox</p>
+      </div>
+      <div class="nav-menu">
+        <nav>
+          <div><a href="/setup">Configurações gerais</a></div>
+          <div><a href="/generos">Gestão de bloqueios</a></div>
+          <div><a href="/promos">Promoções</a></div>
+          <div><a href="/relatorios">Relatórios</a></div>
+          <div><br><a href="/serve">Voltar</a></div>
+          <button onclick="location.href='/aplicar_setup?rota=setup'">APLICAR</button>
+        </nav>
+      </div>
+    </div>
+    <div class="content1">
+      <div class="title">
+        <p>Configuração de gêneros</p>
+      </div>
+      <div id="quadro" class="msg_board">
+        <p>QUADRO DE MENSAGENS: <span id="msg"></span></p>
+      </div>
+      <div class="content2">
+        <div class="genre-box">
+            <p>Gêneros:<span id="genre-item"></span></p>
+            {% for genre in genres %}
+              <div class='genre-item'>{{genre}}</div>
+            {% endfor %}
+        </div>
+        <div class="sub_right">
+          <div class="right-box-area">
+            <div class="control-area">
+              <button onclick="useSelected_grant()"><< >></button>
+            </div>
+            <div class="grant-box">
+              <p>Garantidos: <span id="grant-item"></span></p>
+              {% for grant in grants %}
+              <div class='grant-item'>{{grant}}</div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="right-box-area">
+            <button onclick="location.href='/clear_genres'">LIMPAR TUDO</button>
+            <button onclick="location.href='/get_genre_from_queue'">APLICAR da FILA</button>
+            <button id="applyPlaylistButton" onclick="" disabled><span>APLICAR da PLAYLIST </span> <div id="dropdownContainer"></div></button>
+            
+          </div>
+          <div class="right-box-area">
+            <div class="control-area">
+              <button onclick="useSelected_ban()"><< >></button>
+            </div>
+            <div class="ban-box">
+              <p>Banidos: <span id="ban-item"></span></p>
+              {% for ban in bans %}
+              <div class='ban-item'>{{ban}}</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div><br>
+      <p>
+        <label for="new">Buscar/Adicionar/Deletar Gênero: </label>
+        <input type="text" name="new" id="new">
+        <button onclick="find_genero()">Encontrar Gênero</button>
+        <button onclick="add_genero()">Adicionar Gênero</button>
+      </p>
+    </div>
+  </div>
+
+
+<script>
+
+function countSelectedElements() {
+  const elements = document.querySelectorAll('.genre-item, .grant-item, .ban-item');
+  let count = 0;
+
+  for (const element of elements) {
+    if (element.classList.contains('selected')) { 
+      count++;
+    }
+  }
+
+  return count;
+}
+
+function find_genero() {
+  var genero = document.getElementById('new').value;
+  var classList = ["genre-item", "grant-item", "ban-item"];
+  const results = {};
+
+  elements = document.querySelectorAll(".genre-item, .grant-item, .ban-item")
+  elements.forEach(function(otherItem) {
+      otherItem.classList.remove('selected');
+    });
+
+  let total_count = 0;
+  classList.forEach(className => {
+      const elements = document.querySelectorAll(`.${className}`);
+      let count = 0;
+      
+      for (const elem of elements) {
+        if (elem.textContent.includes(genero)) {
+          elem.classList.add('selected');
+          count++;
+          total_count++;
+        }
+      }
+
+    results[className] = count; 
+  });
+
+  for (eclass of classList) {
+    document.getElementById(eclass).innerHTML = results[eclass];
+  }
+  set_msgboard("Total de " + total_count + " matches.", "success" );
+}
+
+
+function add_genero() {
+  var new_genero = document.getElementById('new').value;
+  var msgbord = document.getElementById('msgb')
+
+  Swal.fire({
+    title: "Adicionar gênero à lista",
+    text: "Você está adicionando o gênero '" + new_genero + "'!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "OK"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      set_msgboard("Por favor aguarde um momento", "alert");
+      const response = fetch('/add_genre_item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_genero })
+      });
+      // Handle the Promise using .then
+      response.then(response => {
+        if (response.ok) {
+          return response.json(); // Parse the JSON response
+        } else {
+          // Handle non-OK response status
+          console.error("Error:", response.statusText);
+          set_msgboard("Algo deu errado", "error")
+          return; // Exit the function if response is not OK
+        }
+      })
+      .then(data => { // Process the JSON data (if successful response)
+        if (data.message == 'ok') {
+          window.location.href = '/generos?msg=' + "Genero " + new_genero + " adicionado ao 'grant'.&msg_type=success";
+        } else {
+          set_msgboard("Gênero já encontrado na lista " + data.message + "!", "alert");
+        }
+      })
+      .catch(error => { // Handle any errors during fetch or parsing
+        console.error("Error:", error);
+        set_msgboard("Algo deu errado ao adicionar o gênero!", "error");
+      });
+    }
+  });
+}
+
+async function useSelected_grant() {
+
+  var selectedValue = document.querySelector('.selected').textContent; 
+  var selectedClass = document.querySelector('.selected').classList;
+ 
+  if ( countSelectedElements() === 1 ) {
+    if (selectedClass == "genre-item selected") {
+      var source_file = "genre"
+      var destination_file = "grant"
+      var alert_message = "adicionando ao 'grant' o gênero '" + selectedValue
+    } else {
+      if (selectedClass == "grant-item selected") {
+        var source_file = "grant"
+        var destination_file = "genre"
+        var alert_message = "removendo do 'grant' o gênero '" + selectedValue
+      } else {
+        Swal.fire("Por favor selecionar um item corretamente.");
+        return;
+      }
+    }
+    Swal.fire({
+      title: "Tem certeza?",
+      text: "Você está " + alert_message + "'!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "OK"
+    }).then((result) => {
+        if (result.isConfirmed) {
+          set_msgboard("Por favor aguarde um momento", "alert");
+          const response = fetch('/move_genre_item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ source_file, destination_file, selectedValue })
+            });
+          // Handle the Promise using .then
+          response.then(response => {
+          if (response.ok) {
+            return response.json(); // Parse the JSON response
+          } else {
+            // Handle non-OK response status
+            console.error("Error:", response.statusText);
+            set_msgboard("Algo deu errado!", "error");
+            return; // Exit the function if response is not OK
+          }
+        })
+        .then(data => { // Process the JSON data (if successful response)
+          if (data.message == 'ok') {
+            window.location.href = "/generos?msg=Alteração bem sucedida!&msg_type=success"
+          } else {
+            set_msgboard("Gênero já encontrado na lista " + data.message + "!", "alert");
+          }
+        })
+        .catch(error => { // Handle any errors during fetch or parsing
+          console.error("Error:", error);
+          set_msgboard("Algo deu errado, verifique seus arquivos", "error");
+        });
+      }
+    });
+  } else {
+    set_msgboard("Parece que há mais de um gênero selecionado. Por favor selecionar um único item para executar a operação.", "alert");
+  }
+}
+
+function useSelected_ban() {
+
+  var selectedValue = document.querySelector('.selected').textContent; 
+  var selectedClass = document.querySelector('.selected').classList;
+
+  if ( countSelectedElements() === 1 ) {
+    if (selectedClass == "genre-item selected") {
+      var source_file = "genre"
+      var destination_file = "ban"
+      var alert_message = "Banindo o gênero '" + selectedValue
+    } else {
+      if (selectedClass == "ban-item selected") {
+        var source_file = "ban"
+        var destination_file = "genre"
+        var alert_message = "Retirando da lista 'ban' o gênero '" + selectedValue
+      } else {
+        Swal.fire("Por favor selecionar um item corretamente.");
+      }
+    }
+    Swal.fire({
+      title: "Tem certeza?",
+      text: "Você está " + alert_message + "'!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "OK"
+    }).then((result) => {
+        if (result.isConfirmed) {
+          set_msgboard("Por favor aguarde um momento", "alert");
+          const response = fetch('/move_genre_item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ source_file, destination_file, selectedValue })
+            });
+          // Handle the Promise using .then
+          response.then(response => {
+          if (response.ok) {
+            return response.json(); // Parse the JSON response
+          } else {
+            // Handle non-OK response status
+            console.error("Error:", response.statusText);
+            set_msgboard("Algo deu errado!", "error")
+            return; // Exit the function if response is not OK
+          }
+        })
+        .then(data => { // Process the JSON data (if successful response)
+          if (data.message == 'ok') {
+            window.location.href = '/generos?msg=Alteração bem sucedida!&msg_type=success'
+          } else {
+            set_msgboard("Gênero já encontrado na lista " + data.message + "!", "alert");
+          }
+        })
+        .catch(error => { // Handle any errors during fetch or parsing
+          console.error("Error:", error);
+          set_msgboard("algo deu errado", "error");
+        });
+      }
+    });
+  } else {
+    set_msgboard("Parece que há mais de um gênero selecionado. Por favor selecionar um único item para executar a operação.", "alert");
+  }
+}
+
+function set_msgboard(message, type) {
+  var msgboard = document.getElementById('quadro');
+  var msgtext = document.getElementById('msg');
+  msgtext.innerHTML = message;
+  msgboard.classList.remove('neutral', 'error', 'success', 'alert');
+  msgboard.classList.add(type);
+}
+
+//colorir msg_board
+set_msgboard("{{ msgb }}", "{{ msg_type }}");
+
+// Add click event listeners to value items
+var genreItems = document.querySelectorAll('.genre-item, .grant-item, .ban-item');
+var textbox = document.getElementById('new')
+genreItems.forEach(function(item) {
+  item.addEventListener('click', function() {
+    var classList = ["genre-item", "grant-item", "ban-item"];
+    // Remove 'selected' class from all items
+    genreItems.forEach(function(otherItem) {
+      otherItem.classList.remove('selected');
+    });
+
+    // Add 'selected' class to the clicked item
+    this.classList.add('selected');
+    for (eclass of classList) {
+      document.getElementById(eclass).innerHTML = "";
+    }
+    textbox.value = this.textContent;
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownContainer = document.getElementById('dropdownContainer');
+    const applyPlaylistButton = document.getElementById('applyPlaylistButton');
+    const optionsData = JSON.parse('{{ playlists | tojson }}');
+
+    // 1. Create the <select> element
+    const selectElement = document.createElement('select');
+    selectElement.id = 'myDynamicDropdown';
+    selectElement.name = 'myDynamicDropdown';
+
+    // 2. Define the options data
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = '-- Select a playlist --';
+    selectElement.appendChild(defaultOption);
+
+    // 3. Populate the <select> with <option> elements
+    optionsData.forEach(optionInfo => {
+        const optionElement = document.createElement('option');
+        optionElement.value = optionInfo.value;
+        optionElement.textContent = optionInfo.text;
+        selectElement.appendChild(optionElement);
+    });
+
+    // 4. Append the <select> element to the container
+    dropdownContainer.appendChild(selectElement);
+
+    // Set initial button state based on default placeholder
+    applyPlaylistButton.disabled = true;
+
+    // Add an event listener to the select element for changes
+    selectElement.addEventListener('change', function() {
+        // Enable the button only if a valid option (not the placeholder) is selected
+        if (this.value !== '') {
+            applyPlaylistButton.disabled = false;
+            applyPlaylistButton.onclick = function() {
+              set_msgboard("Por favor aguarde um momento", "alert");
+              location.href = '/get_genre_from_playlist?msg=Grant atualizado&msg_type=success&playlist_id=' + this.value;
+                }.bind(this); // .bind(this) ensures 'this' inside the function refers to the same 'this' as outside
+        } else {
+            applyPlaylistButton.disabled = true;
+        }
+        console.log('Dropdown selected value:', this.value);
+    });
+  
+});
+
+</script>
+
+</body>
+</html>

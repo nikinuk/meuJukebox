@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer/customer_settings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+          background-image: url("{{ url_for('static', filename='customer/fundo.jpg') }}"); 
+          background-size: cover;
+          background-repeat: no-repeat; 
+          background-attachment: fixed;
+          background-position-x: 0;
+          background-position-y: 0;
+        }
+
+        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 2s linear infinite; /* Spin the loader */
+            margin: 20px auto; /* Center the loader */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+</style>
+    </style>
+    <title>Página de Busca</title>
+</head>
+<body>
+    <div class="content">
+        <header class="app-header">
+            <div class="container">
+                <img src="{{ url_for('static', filename='customer/main_head.png') }}" alt="logo do bar" class="logo">
+            </div>
+        </header>  
+        <div class="subheader">
+            <button class="refresh" onclick="redirectToPage('get_queue')">
+                <img src="{{ url_for('static', filename='customer/voltar.png') }}" alt="voltar à fila">
+                voltar
+            </button>
+            <div>
+                <p>BÚSCA DE MÚSICAS</p>
+            </div>
+        </div>
+        <div class="search-content">
+            <form action="/search_song" method = "POST" class="search">
+                <p><label for="track">Nome da música:</label><input type="text" name="track" id="track" placeholder="Busca por nome"></p>
+                <p><label for="artist">Artista:</label><input type="text" name="artist" id="artist" placeholder="Busca por artista"></p>
+                <p><label for="album">Album:</label><input type="text" name="album" id="album" placeholder="Busca por album"></p>
+                <button class="buscar" type="submit" id="submitButton">Buscar músicas</button>  
+            </form>
+        </div>
+        <div class="filas">
+            <div class="list-header">
+                <p>Resultado da busca:</p>
+            </div>
+            <ul class="music-list">
+                {% for song in search_result %}
+                <li class="music-item" data-song-id="{{ song.id }}" data-artist-id="{{ song.artist_id }}" data-song-name="{{ song.name }}" data-artist-name="{{ song.artist }}" data-album-url="{{ song.url }}">
+                  <img src="{{ song.url }}" alt="{{ song.album_name }}">
+                  <div class="info-n-add">
+                    <div class="info">
+                      <span class="title">{{ song.name }}</span><br>
+                      <span class="artist">{{ song.artist }}</span>
+                    </div>
+                  </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <script>
+
+        const musicItems = document.querySelectorAll('.music-item');
+
+        musicItems.forEach(item => {
+            item.addEventListener('click', function(event) {
+                const songId = this.dataset.songId;
+                const artistId = this.dataset.artistId;
+                const songName = this.dataset.songName;
+                const artistName = this.dataset.artistName;
+                const albumUrl = this.dataset.albumUrl;
+                add_song(songId, artistId, songName, artistName, albumUrl);
+            });
+        });
+
+        async function add_song(song_id, artist_ids, song_name, song_artist, album_url) {
+            //const addToQueueButton = document.getElementById(song_id);
+            //addToQueueButton.disabled = true;
+ 
+            //Swal.fire({
+            //        title: 'Adicionando...',
+            //        text: 'Por favor aguarde!',
+            //        showConfirmButton: false,
+            //        allowOutsideClick: false,
+            //    }); 
+
+            Swal.fire({
+                title: 'Adicionando...',
+                text: 'Por favor aguarde!',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.getHtmlContainer().innerHTML += '<div class="loader"></div>'; // Add the loader
+                },
+                willClose: () => {
+                //Optional: remove the loader when the alert closes (if you close it programmatically)
+                const loader = Swal.getHtmlContainer().querySelector('.loader');
+                if (loader) {
+                    loader.remove();
+                }
+                }
+            });
+            
+            // Send an AJAX POST request with song ID and artist ID
+            const response = await fetch('/add_2_queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ song_id, artist_ids, song_name, song_artist, album_url })
+            });
+            if (response.ok) {
+                const data = await response.json(); 
+                console.log(data.message);
+                if (data.message == 'ok') {
+                    window.location.href = '/get_queue?user={{ user }}'
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Música fora de contexto",
+                        text: data.message,
+                        });
+                    // window.location.href = '/validation_fail?message=${' + data.message + '}'
+                }
+            } else {
+                // Handle error (e.g., display error message)
+            }
+        }
+
+        function redirectToPage(url) {
+            window.location.href = url;
+            }
+
+        const submitButton = document.getElementById('submitButton');
+
+        submitButton.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            Swal.fire({
+                title: "Buscando",
+                icon: "success",
+                html: "Aguarde, por favor.",
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const timer = Swal.getPopup().querySelector("b");
+                    timerInterval = setInterval(() => {
+                    //timer.textContent = `${Swal.getTimerLeft()}`;
+                    }, 100);
+                },
+                willClose: () => {
+                // Submit the form after the Swal is closed (assuming success)
+                submitButton.form.submit();
+                clearInterval(timerInterval);
+                }
+            });
+        });
+    </script>
+</body>
+</html

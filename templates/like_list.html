@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer/customer_settings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+          background-image: url("{{ url_for('static', filename='customer/fundo.jpg') }}"); 
+          background-size: cover;
+          background-repeat: no-repeat; 
+          background-attachment: fixed;
+          background-position-x: 0;
+          background-position-y: 0;
+        }
+    </style>
+    <title>{{ config.title }}</title>
+</head>
+<body>
+    <div class="content">
+        <header class="app-header">
+            <div class="container">
+                <img src="{{ url_for('static', filename='customer/main_head.png') }}" alt="logo do bar" class="logo">
+            </div>
+        </header>
+
+        <div class="subheader">
+            <div>
+                <p>As Mais</p>
+            </div>
+            <div class="radio-buttons">
+                <div>
+                    <input type="radio" id="pedidas" name="pedidas-queridas" value="pass" {% if default_report == 'pass' %}checked{% endif %}>
+                    <label for="week">pedidas</label>
+                </div>
+                <div>
+                    <input type="radio" id="queridas" name="pedidas-queridas" value="likes" {% if default_report == 'likes' %}checked{% endif %}>
+                    <label for="month">queridas</label>
+                </div>
+            </div>
+            <div class="radio-buttons">
+                <div>
+                    <input type="radio" id="week" name="timeframe" value="7" {% if default_timeframe == '7' %}checked{% endif %}>
+                    <label for="week">da semana</label>
+                </div>
+                <div>
+                    <input type="radio" id="month" name="timeframe" value="30" {% if default_timeframe == '30' %}checked{% endif %}>
+                    <label for="month">do mês</label>
+                </div>
+                <div>
+                    <input type="radio" id="year" name="timeframe" value="365" {% if default_timeframe == '365' %}checked{% endif %}>
+                    <label for="year">do ano</label>
+                </div>  
+            </div>
+            <button class="refresh" onclick="redirectToPage('get_queue')">
+                <img src="{{ url_for('static', filename='customer/voltar.png') }}" alt="voltar à fila">
+                voltar
+            </button>
+
+        </div>
+
+        <div class="filas">
+            <div class="stat-list-header">
+                <span>Estatísticas desde {{ start_date }}</span>
+                <span>total</span>
+            </div>
+            
+            <ul class="music-list">
+                {% for song in stats %}
+                <li class="music-item-stat">
+                    <div class="stat-show">
+                        <img src="{{  song.album_url }}" alt="Track Album"> 
+                        <div class="info">
+                            <span class="title">{{ song.song_name }}</span><br>
+                            <span class="artist">{{ song.song_artist }}</span>
+                        </div>
+                        <div class="stats">
+                            {{ song.like_count }}
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function redirectToPage(url) {
+            window.location.href = url;
+            }
+      
+            const radioButtonsTimeframe = document.querySelectorAll('input[name="timeframe"]');
+            const radioButtonsPedidasQueridas = document.querySelectorAll('input[name="pedidas-queridas"]');
+
+            function getOtherValue(radioButtonName) {
+            const allRadioButtons = document.querySelectorAll(`input[name="${radioButtonName}"]`);
+            for (const radio of allRadioButtons) {
+                if (radio.checked) {
+                return radio.value;
+                }
+            }
+            return 'null'; // Or a default value if no radio button is selected
+            }
+
+            radioButtonsTimeframe.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const selectedValue = radio.value;
+                const otherValue = getOtherValue("pedidas-queridas"); 
+                window.location.href = `/report_likes?period=${selectedValue}&report=${otherValue}`;
+            });
+            });
+
+            radioButtonsPedidasQueridas.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const selectedValue = radio.value;
+                const otherValue = getOtherValue("timeframe"); 
+                window.location.href = `/report_likes?period=${otherValue}&report=${selectedValue}`;
+            });
+            });
+
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/fontawesome.min.css" integrity="sha384-NvKbDTEnL+A8F/AA5Tc5kmMLSJHUO868P+lDtTpJIeQdGYaUIuLr4lVGOEA1OcMy" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer/customer_settings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <title>{{ config.title }}</title>
+    <style>
+        body {
+          background-image: url("{{ url_for('static', filename='customer/fundo.jpg') }}"); 
+          background-size: cover; 
+          background-position: center center;
+          background-repeat: no-repeat; 
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <header class="app-header">
+            <div class="container">
+                <img src="{{ url_for('static', filename='customer/main_head.png') }}" alt="logo do bar" class="logo">
+            </div>
+        </header>
+
+        <div class="subheader">
+            <div>
+                <p>FILA TEMPORARIAMENTE FECHADA</p>
+                <p>Enqunto isso, aproveite a banda!!</p>
+            </div>
+            <button class="refresh" onclick="reload_page('/get_queue')">
+                <img src="{{ url_for('static', filename='customer/refresh.png') }}" alt="recarregar fila">
+            </button>
+        </div>
+
+        <div class="now-playing">
+            <div class="list-header">
+                <p>Por hora, só podemos pedir música enquanto a playlist estiver tocando. Regarregue a página mais tarde para tentar outra vez.<br>Obrigado!</p>
+            </div>
+            
+ 
+    <script>
+        function reload_page(url) {
+            window.location.href = url;
+            }
+    </script>
+</body>
+</html>

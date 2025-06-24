@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='customer/meujukebox.png') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/server_style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+          background-size: cover;
+          background-repeat: no-repeat; 
+          background-attachment: fixed;
+          background-position-x: 0;
+          background-position-y: 0;
+        }
+    </style>
+    <title>{{ instance }}</title>
+    <meta http-equiv="refresh" content="60">
+</head>
+<body>
+    <div class="content">
+        <header class="app-header">
+            <div class="container">
+                <img src="{{ url_for('static', filename='customer/main_head.png') }}" alt="logo do bar" class="logo">
+            </div>
+        </header>
+        <div class="serving-title">
+        SERVINDO : {{ instance }} -- <div id="lastUpdated"></div><br>
+        </div>
+        <div class="now-playing">
+            <div class="list-header">
+                <p>- Tocando Agora</p>
+            </div>
+            <ul class="music-list">
+                <li class="playing">
+                  <img src="{{ now_playing.url }}" alt="{{ now_playing.album_name }}"> 
+                  <div class="info">
+                    <span class="title">{{ now_playing.name }} - </span>
+                    <span class="artist">{{ now_playing.artist }} - </span>
+                    <span class="username">A pedido de {{ now_playing.username }}</span>
+                  </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="now-playing">
+            <div class="list-header">
+                <p>- Fila do freguês</p>
+            </div>
+            <ul class="music-list">
+                {% for song in juke_songs %}
+                <li class="playing">
+                    <img src="{{ song.url }}" alt="{{ song.album_name }}"> 
+                    <div class="info">
+                    <span class="title">{{ song.name }} - </span>
+                    <span class="artist">{{ song.artist }} - </span>
+                    <span class="username">A pedido de {{ song.username }}</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="user">
+            <div class="list-header">
+                <p>- Usuários ativos (1 hora)</p>
+            </div>
+            <ul class="numbered-list">
+                {% for user in users %}
+                <li class="user">
+                    <div class="user-info">
+                    {{ user.session_id }} -
+                    {{ user.user_name }} - 
+                    {{ user.user_id }} - 
+                    {{ user.last_seen }}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="list-header">
+                <p>- Atividades (do dia)</p>
+            </div>
+
+            <ul class="numbered-list">
+                {% for act in activity %}
+                <li class="activity-item">
+                    <div class="activity">
+                    <span>{{ act.time_stamp }} :</span>
+                    <span>{{ act.user_name }} :</span>
+                    <span>{{ act.activity_type }} :</span>
+                    <span>{{ act.val_result }} :</span>
+                    <span>{{ act.song_name }} :</span>
+                    <span>{{ act.song_artist }}</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <ul>
+            <li class="user">
+                <img src="{{ url_for('static', filename='customer/user-icon.png') }}" alt="user">            
+                Server
+            </li>
+            <li class="management">
+                <button onclick="reload_page('/setup')">
+                <img src="{{ url_for('static', filename='customer/cog-icon.png') }}" alt="Configurações">
+                Manage
+                </button>
+            </li>
+        </ul>
+    </footer>
+    
+    <script>
+        function updateLastUpdated() {
+            const now = new Date(); // Get current date and time
+
+            // Format the date and time (customize as needed)
+            const formattedDateTime = now.toLocaleString(); // Example: "10/26/2023, 3:30:00 PM"
+
+            // Display the formatted time in the designated div
+            document.getElementById("lastUpdated").textContent = "ÚLTIMA ATUALIZAÇÂO : " + formattedDateTime;
+            }
+
+        // Call the function when the page loads
+        window.onload = updateLastUpdated;
+
+        function reload_page(url) {
+            window.location.href = url;
+            }
+    </script>
+</body>
+</html>

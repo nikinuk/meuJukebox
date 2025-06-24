@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+  <link rel="stylesheet" href="{{ url_for('static', filename='customer/customer_settings.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+  <title>Share Content</title>
+  <style>
+    .container_share {
+    background-image: url("{{ url_for('static', filename='customer/jukebox_share.jpg') }}");
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div class="container_share">
+    <button class="button_share" onclick="shareToInstagramStory()">Compartilhar</button>
+    <button class="button_share" onclick="downloadImage()">Baixar para postar</button>
+    <button class="button_share" onclick="redirectToPage('get_queue')">&lt;&lt; voltar &lt;&lt;</button>
+  </div>
+
+  <script>
+
+    // Function to share image to Instagram Stories
+    function shareToInstagramStory() {
+      // Make sure image is accessible via a public URL
+      // This is critical - Instagram can only access publicly available images
+      
+      // Encode parameters
+      const encodedImageUrl = encodeURIComponent("{{ url_for('static', filename='customer/jukebox_share.jpg') }}");
+      const encodedBrandingText = encodeURIComponent("Postado por @meujukebox");
+      const app_id = encodeURIComponent("667561715712618");
+      const app_url = encodeURIComponent("https://www.instagram.com/meujukebox?igsh=MTQxMHlhcDdyMzh5MA==");
+      
+      // Create Instagram story URL with source attribution
+      //const instagramUrl = `instagram-stories://share?source_application=YOUR_APP_ID&background_image=${encodedImageUrl}&attribution_link=YOUR_APP_WEBSITE&attribution_name=${encodedBrandingText}`;
+      const instagramUrl = `instagram-stories://share?background_image=${encodedImageUrl}`;
+      // Fallback URL if Instagram Stories sharing fails
+      const fallbackUrl = 'https://instagram.com';
+      
+      // Try to open Instagram Stories
+      window.location.href = instagramUrl;
+      
+      // Set a timeout to check if Instagram was opened
+      setTimeout(() => {
+        // If Instagram didn't open, redirect to fallback URL
+        window.location.href = fallbackUrl;
+      }, 2000);
+    }
+
+    function shareContent1() {
+      const shareData = {
+        title: 'Olha que bacana o que estou fazendo agora mesmo!',
+        text: 'Aqui, curting uma sonzeira no Juke-Box do Jacobina',
+        url: 'static/customer/jukebox-nowplaying.jpg'
+      };
+
+      navigator.share(shareData)
+        .then(() => console.log('Content shared successfully'))
+        .catch(error => console.error('Error sharing content:', error));
+    }
+
+    function downloadImage() {
+      const link = document.createElement('a');
+      link.href = "{{ url_for('static', filename='customer/jukebox_share.jpg') }}";
+      link.download = 'jukebox-sharing.jpg'; // Set the desired filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function redirectToPage(url) {
+        window.location.href = url;
+        }
+  </script>
+</body>
+</html>

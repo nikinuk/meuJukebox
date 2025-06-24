@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/fontawesome.min.css" integrity="sha384-NvKbDTEnL+A8F/AA5Tc5kmMLSJHUO868P+lDtTpJIeQdGYaUIuLr4lVGOEA1OcMy" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer/customer_settings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <title>Register Page</title>
+</head>
+<body>
+    <div class="content">
+        <header class="app-header">
+            <div class="container">
+                <img src="{{ url_for('static', filename='customer/main_head.png') }}" alt="logo do bar" class="logo">
+            </div>
+        </header>
+            
+        <div class="subheader">
+            <div>
+                <p>Registra-te</p>
+            </div>
+            <button class="refresh" onclick="reload_page('get_queue')">
+                <img src="{{ url_for('static', filename='customer/voltar.png') }}" alt="voltar à fila">
+            </button>
+        </div>
+        <div class="content2">
+            <div class="list-header">
+                <p>Register</p>
+            </div>
+            <div class="paragraf">
+                <form method="post" action="/register">
+                    <label for="username">Nome, como quer ser identificado na tela:</label><br>
+                    <input type="text" id="username" name="username"><br><br>
+                    <label for="email">email (user id):</label><br>
+                    <input type="email" id="email" name="email"><br><br>
+                    <label for="password">Password:</label><br>
+                    <input type="password" id="password" name="password"><br><br>
+                    <button type="submit">Register</button>
+                </form>
+            </div>
+        </div>  
+    </div>  
+    <script>
+        function reload_page(url) {
+            window.location.href = url;
+            }
+    </script>
+</body>
+</html>

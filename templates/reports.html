@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Select and Use Values</title>
+<link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+<style>
+
+.container {
+  display: flex;
+}
+.nav-window {
+  display: flex;
+  flex-direction: column;
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  height: 100vh; 
+  overflow-y: auto; 
+  background-color: #909090; 
+  padding: 20px; 
+}
+.content  {
+  margin-left: 200px; /* Adjust this value based on your nav-menu width */
+  padding: 20px; 
+  display: flex;
+  flex-direction: column;
+}
+
+.report {
+  margin-left: 350px; /* Adjust this value based on your nav-menu width */
+  padding: 20px;
+}
+
+.value-box {
+  width: 200px; /* Adjust width as needed */
+  height: 150px; /* Adjust height as needed */
+  overflow-y: auto; /* Enable vertical scrollbar */
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+
+.value-item {
+  margin-bottom: 5px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.value-item.selected {
+  background-color: hsl(126, 24%, 50%);
+}
+
+.pass {
+  margin-bottom: 5px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.pass.selected {
+  background-color: #eee;
+}
+
+.report {
+  margin-bottom: 5px;
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+.content-nav {
+  position: fixed; 
+  top: 0; 
+  left: 150; 
+  height: 100vh; 
+  overflow-y: auto; 
+  background-color: #a1a1a1; 
+  padding: 20px; 
+}
+
+table {
+      border-collapse: collapse;
+      width: 90%;
+    }
+
+th, td {
+      border: 1px solid #585858;
+      padding: 2px;
+      text-align: left;
+    }
+
+th {
+      background-color: #a9a9a9;
+    }
+.nav-menu button {
+            margin-top: 20px;
+        }
+
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="nav-window">
+    <div class="title">
+      <p>Gerenciamento do jukebox</p>
+    </div>
+    <div class="nav-menu">
+      <nav>
+        <div><a href="/setup">Configurações gerais</a></div>
+        <div><a href="/generos">Gestão de bloqueios</a></div>
+        <div><a href="/promos">Promoções</a></div>
+        <div><a href="/relatorios">Relatórios</a></div>
+        <div><br><a href="/serve">Voltar</a></div>
+        <button onclick="location.href='/aplicar_setup?rota=setup'">APLICAR</button>
+      </nav>
+    </div>
+  </div>
+  <div class="content">
+    <div class="content-nav">
+      <div class="title">
+        <p>Relatórios utilização do Jukebox</p>
+      </div>
+      <div>
+        <form id="report-form" method="POST" action="/relatorios">
+          <label for="report-type">Tipo de relatório:</label>
+          <div class="radio-buttons">
+            <div>
+                <input type="radio" id="likes" name="report-type" value="like" {% if reptype == 'like' or reptype == None %}checked{% endif %}>
+                <label for="week">Likes</label>
+            </div>
+            <div>
+                <input type="radio" id="aprovados" name="report-type" value="True" {% if reptype == 'True' %}checked{% endif %}>
+                <label for="month">Pedidos aprovados</label>
+            </div>
+            <div>
+                <input type="radio" id="reprovados" name="report-type" value="False" {% if reptype == 'False' %}checked{% endif %}>
+                <label for="year">Pedidos reprovados</label>
+            </div>  
+            <br>
+          </div>
+          <label for="timeframe">Escolha o período:</label>
+          <select id="timeframe" name="timeframe">
+            <option value="today">Hoje</option>
+            <option value="yesterday">Ontem</option>
+            <option value="last_7_days">Semana Corrida</option>
+            <option value="last_month">Mês corrido</option>
+            <option value="current_year">Ano Corrido</option>
+            <option value="custom">Datas específicas</option>
+          </select>
+          
+          <div id="custom-dates" style="display: none;">
+            <label for="start_date">Data inicial:</label>
+            <input type="date" id="start_date" name="start_date">
+            <label for="end_date">Data final:</label>
+            <input type="date" id="end_date" name="end_date">
+          </div>
+          <br><br>
+          <button type="submit">Generate Report</button>
+        </form>
+      </div>
+    </div>
+    <div>
+      <button onclick="useSelected()">Gerar relatório</button>
+    </div>
+    <div class="report">
+        {% for line in report %}
+        <table>
+            <tr>
+              <th>Data e hora:</th>
+              <td>{{ line.time_stamp }}</td>
+            </tr>
+            <tr>
+              <th>Nome da música:</th>
+              <td>{{ line.song_name }}</td>
+              <th>id:</th>
+              <td>{{ line.track_id }}</td>
+            </tr>
+            <tr>
+              <th>Artistas:</th>
+              <td>{{ line.song_artist }}</td>
+
+              {% if reptype != 'like' %}
+
+              <th>ids:</th>
+              <td>
+              {% for id in line.ids_artistas %}
+              {{ id }}<br>
+              {% endfor %}
+              </td>
+            </tr>
+            <tr>
+              <th>Gêneros:</th>
+              <td>{{ line.generos }}</td>
+            </tr>
+            <tr>
+              <th>Causa do rejeito:</th>
+              <td>{{ line.reason }}</td>
+
+              {% endif %}
+
+            </tr>
+        </table><br>
+        {% endfor %}
+    </div>
+  </div>
+</div>  
+
+<script>
+
+  const timeframeSelect = document.getElementById('timeframe');
+  const customDates = document.getElementById('custom-dates');
+
+  timeframeSelect.addEventListener('change', function() {
+    if (this.value === 'custom') {
+      customDates.style.display = 'block';
+    } else {
+      customDates.style.display = 'none';
+    }
+  });
+
+  // Add click event listeners to value items
+  var valueItems = document.querySelectorAll('.value-item');
+  valueItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+      // Remove 'selected' class from all items
+      valueItems.forEach(function(otherItem) {
+        otherItem.classList.remove('selected');
+      });
+
+      // Add 'selected' class to the clicked item
+      this.classList.add('selected');
+    });
+  });
+
+</script>
+
+</body>
+</html>

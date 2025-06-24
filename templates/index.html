@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer/customer_settings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+          background-image: url("{{ url_for('static', filename='customer/fundo.jpg') }}"); 
+          background-size: cover;
+          background-repeat: no-repeat; 
+          background-attachment: fixed;
+          background-position-x: 0;
+          background-position-y: 0;
+        }
+    </style>
+    <title>{{ config.title }}</title>
+</head>
+<body>
+    <div id="splash">
+        {% if splash_index <= 0 %}
+            <img src="{{ url_for('static', filename=splash_image) }}" alt="" class="logo" />
+        {% else %}
+            <img src="{{ splash_image }}" alt="" class="logo" />
+        {% endif %}
+    </div>
+    <div class="content">
+        <header class="app-header">
+            <div class="container">
+                <img src="{{ url_for('static', filename='customer/main_head.png') }}" alt="logo do bar" class="logo">
+            </div>
+        </header>
+
+        <div class="subheader">
+            <div>
+                <p>TOCANDO PLAYLIST DA CASA</p>
+                <p>Usuário: {{ user }}</p>
+            </div>
+            <button onclick="reload_page('/get_queue?user={{ user }}')">
+                <img src="{{ url_for('static', filename='customer/refresh.png') }}" alt="refresh"> 
+                recarregar
+            </button>
+        </div>
+
+        <div class="now-playing">
+            <div class="list-header">
+                <p>Tocando Agora</p>
+            </div>
+            
+            <ul class="music-list">
+                <li class="playing">
+                  <img src="{{ now_playing.url }}" alt="{{ now_playing.album_name }}" class="album"> 
+                  <img src="{{ url_for('static', filename='customer/wave.gif') }}" alt="pulsing gif" class="wave">
+                  <div class="info">
+                    <span class="title">{{ now_playing.name }}</span><br>
+                    <span class="artist">{{ now_playing.artist }}</span><br>
+                    <span class="username">A pedido de {{ now_playing.username }}</span><br><br>
+                    <span class="media">
+                        <div class="instagram">
+                            <form action="/share_click" method = "POST">
+                                <input type="hidden" name="url" value="{{ now_playing.url }}">
+                                <input type="hidden" name="track" value="{{ now_playing.name }}">
+                                <input type="hidden" name="artist" value="{{ now_playing.artist }}">
+                                <button class="invisible" type="submit">
+                                    <img src="{{ url_for('static', filename='customer/instagram.png') }}" alt="compartilhar no instagram">
+                                </button>
+                            </form>
+                        </div>
+                        <div class="like">
+                            <div id="heart-button">
+                                <button class="invisible" id="like-button"><img src="{{ heart_icon }}" alt="amei!"></button>
+                            </div>
+                            <div id="num_of_likes">
+                                {{likes}}x 
+                            </div>
+                        </div>
+                        <div class="letras">
+                            <button class="invisible" onclick="window.open('https://www.google.com/search?q={{ query_letra }}', '_blank');">
+                                <img src="{{ url_for('static', filename='customer/microfone.png') }}" alt="buscar letra">
+                            </button>
+                        </div>
+                    </span>
+                  </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="filas">
+            <div class="list-header">
+                <p>Fila do freguês</p>
+            </div>
+            <ul class="music-list">
+                {% for song in juke_songs %}
+                <li class="music-item">
+                    <img src="{{ song.url }}" alt="{{ song.album_name }}"> 
+                    <div class="info">
+                    <span class="title">{{ song.name }}</span><br>
+                    <span class="artist">{{ song.artist }}</span><br>
+                    <span class="username">A pedido de {{ song.username }}</span>
+                    </div>
+                </li>
+                {% endfor %}
+                <li class="add-song">
+                    <div>
+                        <button  class="adicionar" onclick="location.href='/search_page'">Pedir musica</button>
+                    </div>
+                </li>
+            </ul>
+
+            <div class="list-header">
+                <p>Fila da casa</p>
+            </div>
+
+            <ul class="music-list">
+                {% for song in house_songs %}
+                <li class="music-item">
+                    <img src="{{  song.url }}" alt="{{ song.album_name }}"> 
+                    <div class="info">
+                    <span class="title">{{ song.name }}</span><br>
+                    <span class="artist">{{ song.artist }}</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <footer class="app-footer">
+        <ul>
+            <li class="icon">
+                <img src="{{ url_for('static', filename='customer/user-icon.png') }}" alt="user">            
+                {{ user }}
+            </li>
+            <li class="like-stats">
+                <button onclick="reload_page('/report_likes?report=likes')">
+                <img src="{{ url_for('static', filename='customer/hearts.png') }}" alt="As mais queridas">
+                As mais queridas
+                </button>
+            </li>
+            <li class="icon">
+                <button onclick="reload_page('/identifiquese')">
+                    <img src="{{ url_for('static', filename='customer/login-icon.png') }}" alt="Identifique-se">
+                    Identifique-se
+                </button>
+            </li>
+        </ul>
+    </footer>
+    <script>
+        $(document).ready(function() {
+            $('#like-button').click(function() {
+                $.ajax({
+                    url: '/heart_click',
+                    type: 'POST',
+                    data: { 'id': '{{ now_playing.id }}',
+                     },
+                    success: function(response) {
+                        $('#num_of_likes').html(`${response.likes}x`);
+                        $('#heart-button').html(`<button class="invisible" id="like-button"><img src="${response.heart_icon}" alt="amei!"></button>`);
+                        $.ajax({
+                            url: '/heart_click_log',
+                            type: 'POST',
+                            data: { 'id': '{{ now_playing.id }}',
+                                'name': '{{ now_playing.name }}',
+                                'artist': '{{ now_playing.artist }}',
+                                'url': '{{ now_playing.url }}',
+                                'user': '{{ user }}'
+                            },
+                            success: function(response) { }
+                        });
+                    }
+                });
+            });
+        });
+
+        function reload_page(url) {
+            window.location.href = url;
+            }
+
+        //SPLASH-----------------------
+        
+        const splIndex = "{{ splash_index }}";
+        const splash = document.getElementById('splash');
+        if (splIndex === "0") {
+            splash.addEventListener('click', function() { 
+                phaseout(splash); 
+            });
+        } else {
+            if (splIndex === "-1") {
+                setTimeout(() => {
+                phaseout(splash)
+                }, 500);
+            } else {
+                setTimeout(() => {
+                phaseout(splash)
+                }, 2000);
+            }
+            
+        };
+
+        function phaseout(splash) {
+            const myAudio = document.getElementById('myaudio');
+            const playFlag = "{{ playtune }}";
+            splash.classList.add('fade');
+            setTimeout(() => {
+                splash.style.zIndex = -1;
+            }, 1000);    
+        }
+    </script>
+</body>
+</html>

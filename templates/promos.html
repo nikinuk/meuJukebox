@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Jukebox Promos</title>
+    <style>
+
+        .container {
+        display: flex;
+        }
+        .nav-window {
+  display: flex;
+  flex-direction: column;
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  height: 100vh; 
+  overflow-y: auto; 
+  background-color: #909090; 
+  padding: 20px; 
+}
+.content  {
+  margin-left: 200px; /* Adjust this value based on your nav-menu width */
+  padding: 20px; 
+  display: flex;
+  flex-direction: column;
+}
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+        .key-cell {
+            width: 100px;
+        }
+        .value-cell {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-menu button {
+            margin-top: 20px;
+        }
+
+        img { max-width: 100px; max-height: 100px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-window">
+            <div class="title">
+                <p>Gerenciamento do jukebox</p>
+            </div>
+            <div class="nav-menu">
+                <nav>
+                    <div><a href="/setup">Configurações gerais</a></div>
+                    <div><a href="/generos">Gestão de bloqueios</a></div>
+                    <div><a href="/promos">Promoções</a></div>
+                    <div><a href="/relatorios">Relatórios</a></div>
+                    <div><br><a href="/serve">Voltar</a></div>
+                    <button onclick="location.href='/aplicar_setup?rota=setup'">APLICAR</button>
+                </nav>
+            </div>
+        </div>
+        <div class="content">
+            <div class="title">
+                <p>Configurações de promoções</p>
+            </div>
+            <div id="promo-display"></div>
+            <br>
+            <label for="imageUpload">
+                ADICIONAR PROMO -> 
+                <input type="file" id="imageUpload" accept="image/*">
+            </label>
+        </div>
+    </div>
+    <script>
+        fetch('/get_promos')
+            .then(response => response.json())
+            .then(data => {
+                const promoDisplay = document.getElementById('promo-display');
+                const promoTable = document.createElement('table');
+                promoTable.classList.add('promo-table');
+
+                if (data && data.length > 0) {
+                // Create table header
+                const headerRow = promoTable.insertRow();
+                const headers = Object.keys(data[0]);
+                headers.forEach(headerText => {
+                    const headerCell = document.createElement('th');
+                    headerCell.textContent = headerText;
+                    headerRow.appendChild(headerCell);
+                });
+                //Create dell column
+                const headerCell = document.createElement('th');
+                headerCell.textContent = 'apagar';
+                headerRow.appendChild(headerCell);
+
+                // Create table rows
+                data.forEach(promo => {
+                    const row = promoTable.insertRow();
+                    headers.forEach(header => {
+                    const cell = row.insertCell();
+                    if (header === 'src') {
+                        // Create image element for 'src' column
+                        const img = document.createElement('img');
+                        img.src = promo[header];
+                        img.style.maxWidth = '100px'; // Optional: Limit image size
+                        cell.appendChild(img);
+                    } else {
+                        // Display other data as text
+                        cell.textContent = promo[header];
+                    }
+                    });
+                    const cell = row.insertCell();
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'apagar';
+                    deleteButton.addEventListener('click', () => delete_line(promo['id']));
+                    cell.appendChild(deleteButton);
+                });
+                } else {
+                promoDisplay.textContent = "Não há promoções cadastradas";
+                }
+
+                promoDisplay.appendChild(promoTable);
+            })
+            .catch(error => {
+                console.error('Error fetching config:', error);
+                promoDisplay.textContent = 'Error loading config.';
+            });
+
+        const imageUpload = document.getElementById('imageUpload');
+        
+        imageUpload.addEventListener('change', function(event) {
+            const files = event.target.files;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                const arrayBuffer = e.target.result; // Binary data as ArrayBuffer
+                sendBinaryFileToFlask(arrayBuffer, file.name); // Send to Flask
+                };
+
+                reader.readAsArrayBuffer(file); // Read as binary data
+            };
+            setTimeout(() => {
+                window.location.reload();
+                }, 2000);
+            });
+
+            function sendBinaryFileToFlask(arrayBuffer, fileName) {
+                fetch('/upload_to_gcs', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/octet-stream', // Indicate binary data
+                    'X-File-Name': fileName, // Send filename as a header
+                    },
+                    body: arrayBuffer, // Send the binary data
+                })
+                .then(response => {
+                    if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Or response.text()
+                })
+                .then(data => {
+                    console.log('Upload success:', data);
+                })
+                .catch(error => {
+                    console.error('Upload error:', error);
+                });
+            }
+        
+            function delete_line(rowId) {
+                fetch('/delete_promo', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: rowId }),
+                })
+                    .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json(); // or response.text() if your Flask endpoint returns plain text.
+                    })
+                    .then(data => {
+                    // Handle the response from the Flask endpoint (e.g., show a success message)
+                    console.log('Delete response:', data);
+                    // Example: remove the row from the table
+                    const rowToRemove = document.getElementById(`row-${rowId}`);
+                    if (rowToRemove) {
+                        rowToRemove.remove();
+                    } else {
+                        console.error(`Row with ID ${rowId} not found.`);
+                    }
+
+                    })
+                    .catch(error => {
+                    // Handle errors during the fetch request
+                    console.error('Error deleting promo:', error);
+                    alert('Recarregue a página para verificar se promo foi apagada'); // Or display an error message in a more user-friendly way.
+                });
+                setTimeout(() => {
+                window.location.reload();
+                }, 2000);
+            }
+    </script>
+</body>
+</html>

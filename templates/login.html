@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='customer/favicon.png') }}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/fontawesome.min.css" integrity="sha384-NvKbDTEnL+A8F/AA5Tc5kmMLSJHUO868P+lDtTpJIeQdGYaUIuLr4lVGOEA1OcMy" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer/customer_settings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <title>Login Page</title>
+</head>
+
+<body>
+    <div class="content">
+        <header class="app-header">
+            <div class="container">
+                <img src="{{ url_for('static', filename='customer/main_head.png') }}" alt="logo do bar" class="logo">
+            </div>
+        </header>
+        
+        <div class="subheader">
+            <div>
+                <p>Indetifique-se</p>
+            </div>
+            <button class="refresh" onclick="reload_page('get_queue')">
+                <img src="{{ url_for('static', filename='customer/voltar.png') }}" alt="voltar à fila">
+            </button>
+        </div>
+        <div class="content2">
+            <div class="list-header"> 
+                <p>Entre como visitante</p>   
+            </div>
+            <div class="paragraf">
+                <p>Como visitante você pode escolher um nome como será identificado ao longo da sua seção, mas não será lembrado a cada seção. Se preferir não se identificar suas ações, como likes e pedidos de músicas, serão registradas anonimamente</p>    
+                <form method="post" action="/visitor_login"><br>
+                    <label for="visitor_name">Nome de visitante:</label>
+                    <input type="text" id="visitor_name" name="visitor_name"><br><br>
+                    <button type="submit">Entrar</button>
+                </form>
+            </div>
+            <div class="list-header">
+                <p>Entre como usuário</p>
+            </div>
+            <div class="paragraf">
+                <p>Como usuário você reserva um nome só para você, e será sempre lembrado neste site.</p>
+                <br>
+                <form method="post" action="/user_login">
+                    <label for="username">email:</label>
+                    <input type="text" id="email" name="email"><br><br>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password"><br><br>
+                    <button type="submit">Login</button>
+                </form>
+            
+                <p>Quer ser sempre lembrado? <a href="/register">Registre-se!!</a></p>
+            </div>
+        </div>
+    </div> 
+    <script>
+        function reload_page(url) {
+            window.location.href = url;
+            }
+    </script>
+</body>
+</html>

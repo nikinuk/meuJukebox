@@ -1,0 +1,16 @@
+Dockerfile
+README.md
+*.pyc
+*.pyo
+*.pyd
+*.sh
+*.ipynb
+__pycache__
+.pytest_cache
+.idea
+archive/
+reports/
+clientes/
+db
+jukebox_env/
+instruções_gcloud.txt

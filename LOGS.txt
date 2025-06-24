@@ -1,0 +1,37 @@
+my log - 001 - Evento lançado
+my log - 002 - Hostname: 
+my log - 003 - Rodando local
+my log - 003 - Rodando nas núvens
+my log - 004 - Verificando acesso do usuário ...
+my log - 005 - Acesso de usuário validado:", DB_USER
+my log - 005 - Usuário sem acesso
+my log - 005 - Erro nos dadoss: e
+my log - 006 - garantindo acessos ao usuário:, DB_USER
+my log - 007 - Logando com superuser
+my log - 007 - Erro ao conectar superuser ao banco de dados: e
+my log - 008 - usuário atualizado: DB_USER
+my log - 008 - Erro ao dar acessos a DB_USER
+my log - 009 - configuração para INSTANCE não encontrada
+my log - 010 - criando configuração
+my log - 011 - Configuração criada: instance
+my log - 011 - Erro na criação da config: e
+my log - 012 - Carregando variáveis de configuração
+my log - 013 - Iniciando primeiro login - request for token
+my log - 014 - Iniciando forced login - request for token
+my log - 015 - Callbeck - Erro no login: request.args
+my log - 015 - Callback - Token recebido e login realizado
+
+my log - add_2_queue - track adicionado - id: {track_id} - nome: {song_name} "
+my log - add_2_queue - track bloqueado - id: {track_id} - nome: {song_name} - id_artista: {str(artist_ids)} - nome_artista: {song_artist} - validação: {validation_string}")
+my log - heart_click - like registrado em {song_id}
+my log - share_click_ Compartilhamento de midia: {track}
+my log - share_click - Erro em compartilhamento
+
+my log - ERROR EM paste_images_resized - construindo imagens - " + 
+my log - ERROR EM log_like - Error parsing line: {line}
+my log - ERRO EM sql_exe - SQLAlchemy error ocorreu: {e}
+my log - ERRO EM sql_exe - An unexpected error occurred: {e}
+my log - ERROR EM register_user - SQLAlchemy - An error occurred: {e}
+my log - ERROR EM register_user -An unexpected error occurred: {e}
+my log - ERROR EM verify_password - Error verifying password: {e}
+

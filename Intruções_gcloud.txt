@@ -1,0 +1,31 @@
+gcloud builds submit --tag gcr.io/jukebox-446711/login
+gcloud run deploy jukebox-blackbird --image=gcr.io/jukebox-446711/login --platform=managed
+
+
+icones: https://icons8.com/icons
+
+https://me-qr.com/qr-code-generator/
+
+senha SQL: k]a-hXIRZ0taLT}K
+9zrXWGKFuTbDbkaa
+
+gcloud projects add-iam-policy-binding jukebox-446711 --member="serviceAccount:jukeboxsc@jukebox-446711.iam.gserviceaccount.com" --role=roles/cloudsql.client
+gcloud iam service-accounts add-iam-policy-binding jukeboxsc@jukebox-446711.iam.gserviceaccount.com --member="user:nikinuk@gmail.com" --role=roles/iam.serviceAccountUser
+
+
+gcloud run services describe jukebox-jacobina --region=southamerica-east1 --format="value(spec.template.spec.serviceAccountName)"
+
+gcloud run services update jukebox-jacobina --set-env-vars="REDIRECT_URI=$REDIRECT_URI,ACCESS_TOKEN=$ACCESS_TOKEN,REFRESH_TOKEN=$REFRESH_TOKEN,EXPIRES_AT=$EXPIRES_AT,JUKE_LIST=$JUKE_LIST,LIKES=$LIKES,CLIENT_ID=$CLIENT_ID,CLIENT_SECRET=$CLIENT_SECRET,JUKE_LIST2=$JUKE_LIST2,ICN=$ICN,DB_USER=$DB_USER,DB_PASS=$DB_PASS,DB_NAME=$DB_NAME,INSTANCE=$INSTANCE" 
+
+gcloud run services describe jukebox-jacobina --region=southamerica-east1 --format="value(spec.template.spec.serviceAccountName)"
+gcloud run services describe jukebox-jacobina --region=southamerica-east1 --format="value(status.url)"
+
+gcloud run services update jukebox-jacobina --service-account jukeboxsc@jukebox-446711.iam.gserviceaccount.com
+
+https://jukebox-blackbird-hrbec6un6a-rj.a.run.app
+https://jukebox-jacobina-hrbec6un6a-rj.a.run.app
+https://jukebox-hrbec6un6a-rj.a.run.app
+
+
+gcloud iam service-accounts add-iam-policy-binding 459577242298-compute@developer.gserviceaccount.com --member="nikinuk@gmail.com" --role="roles/cloudsql.admin"
+gcloud projects add-iam-policy-binding jukebox-446711 --member=459577242298-compute@developer.gserviceaccount.com --role=roles/cloudsql.admin
